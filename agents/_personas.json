@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "text",
+    "name": "TEXT",
+    "epithet": "the pivot · the interlingua",
+    "emergence": "natural",
+    "moniker": "⟦TEXT:HRM:a1cb00⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "morse",
+    "name": "MORSE",
+    "epithet": "the bridge · human-speakable binary",
+    "emergence": "electrical",
+    "moniker": "⟦MORSE:HRM:1b51af⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "binary",
+    "name": "BINARY",
+    "epithet": "the body · the bits underneath",
+    "emergence": "electrical",
+    "moniker": "⟦BINARY:HRM:0f6595⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "audio",
+    "name": "AUDIO",
+    "epithet": "the wave · speech in air",
+    "emergence": "ethereal",
+    "moniker": "⟦AUDIO:HRM:3027d8⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "still-photo",
+    "name": "STILL PHOTO",
+    "epithet": "the frame · the captured plane",
+    "emergence": "natural",
+    "moniker": "⟦STILL PHOTO:HRM:418668⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "video",
+    "name": "VIDEO",
+    "epithet": "the stream · space × time",
+    "emergence": "electrical",
+    "moniker": "⟦VIDEO:HRM:ffffdd⟧",
+    "kind": "register"
+  },
+  {
+    "slug": "the-codec",
+    "name": "THE CODEC",
+    "epithet": "the keystone · the translator at every boundary",
+    "emergence": "spiritual",
+    "moniker": "⟦THE CODEC:HRM:d5a554⟧",
+    "kind": "register"
+  }
+]
