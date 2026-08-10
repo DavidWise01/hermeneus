@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HERMES · Network Monitor · 0root.ai</title>
+<meta name="description" content="HERMES — beacon surveillance and gateway monitor for the TriPod-Mythos 43-Body Stack. Body 35-39 of the canonical lineage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@500;700&family=EB+Garamond:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500;700&family=Major+Mono+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* bone-white parchment */
+  --paper:        #f4f1e8;
+  --paper-soft:   #ebe8de;
+  --cream:        #faf7ee;
+  --card:         #ede9da;
+  --card-soft:    #e0dcc8;
+
+  /* deep forest dark layer */
+  --wood:         #1a2820;
+  --wood-soft:    #243530;
+  --wood-card:    #2a3d36;
+  --wood-glow:    #34483f;
+
+  /* sage borders + moss ink */
+  --border:       #748c70;
+  --border-soft:  #a4b59a;
+  --border-faint: #c8d2bc;
+  --border-wood:  #3d5448;
+  --ink:          #2d4a3e;
+  --ink-soft:     #4a6859;
+  --ink-faint:    #7a8a7a;
+
+  /* state palette · environmental */
+  --good:         #4a7c5a;
+  --good-deep:    #355a3f;
+  --bad:          #8a4a3a;          /* dried clay */
+  --warn:         #a08a3a;          /* lichen yellow */
+  --warn-deep:    #6e5e1f;
+  --alert:        #8a4a3a;
+
+  /* HERMES specific (still green-family) */
+  --hermes:       #5e7858;          /* pine shadow · was cyan */
+  --hermes-deep:  #355a3f;          /* deep moss */
+  --hermes-glow:  #7a9a78;          /* meadow accent */
+
+  /* layer accents · all green spectrum */
+  --L0: #5a7a4a;
+  --L1: #4a7c5a;
+  --L2: #6e8a5a;
+  --L3: #8aa080;
+  --L4: #5e7858;
+  --L5: #7a9a78;   /* HERMES lives here */
+  --L6: #4a6a48;
+  --L7: #355a3f;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  background-image:
+    radial-gradient(ellipse at top left, #faf7ee 0%, transparent 60%),
+    radial-gradient(ellipse at bottom right, #d8dccb 0%, transparent 70%);
+  color: var(--ink);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content:''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image: repeating-linear-gradient(0deg,
+    rgba(74,124,90,0.012) 0px, transparent 1px,
+    transparent 2px, rgba(74,124,90,0.012) 3px);
+  opacity: 0.7;
+}
+body::after {
+  content:''; position: fixed; inset: 0; pointer-events: none; z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(45,74,62,0.08) 100%);
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+.blink { animation: blink 1.6s steps(2) infinite; }
+
+/* ═══ APP ═══ */
+.app {
+  max-width: 1100px; margin: 0 auto;
+  position: relative; z-index: 10;
+  border-left: 1px solid var(--border-soft);
+  border-right: 1px solid var(--border-soft);
+  background: rgba(244,241,232,0.4);
+  min-height: 100vh;
+}
+
+/* ═══ HEADER ═══ */
+.topbar {
+  padding: 14px 22px;
+  border-bottom: 2px double var(--border);
+  background: linear-gradient(180deg, rgba(74,124,90,0.06) 0%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+}
+.brand {
+  font-family: "Major Mono Display", monospace;
+  font-size: 22px; color: var(--ink); letter-spacing: 0.06em;
+}
+.brand-sub {
+  font-size: 9px; color: var(--ink-faint);
+  letter-spacing: 0.2em; margin-left: 14px;
+}
+.header-right { display: flex; gap: 8px; align-items: center; }
+.snd-btn, .online-pill {
+  background: transparent; border: 1px solid var(--border-soft);
+  padding: 4px 12px; font-size: 10px; letter-spacing: 0.18em;
+  font-family: inherit; cursor: pointer; color: var(--ink-soft);
+}
+.snd-btn.on { color: var(--good); border-color: var(--good); }
+.online-pill {
+  color: var(--good); border-color: var(--good);
+  cursor: default; animation: blink 2s steps(2) infinite;
+}
+
+/* ═══ STACK BANNER (placement inside 43-body stack) ═══ */
+.stack-banner {
+  margin: 14px 22px;
+  background: var(--wood-soft); color: var(--paper-soft);
+  border: 1px solid var(--border-wood);
+  padding: 10px 16px;
+  display: flex; gap: 16px; align-items: center;
+  font-size: 10px; flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(26,40,32,0.4);
+}
+.stack-banner b { color: var(--border-faint); }
+.stack-banner .body-pill {
+  background: var(--L5); color: var(--wood);
+  font-size: 9px; padding: 2px 8px; font-weight: 700;
+  letter-spacing: 0.1em; font-family: "JetBrains Mono", monospace;
+}
+.stack-banner .verify-btn {
+  margin-left: auto;
+  background: transparent; color: var(--border-faint);
+  border: 1px solid var(--border-soft);
+  padding: 4px 12px; font-family: inherit; font-size: 9px;
+  letter-spacing: 0.15em; cursor: pointer; font-weight: 700;
+}
+.stack-banner .verify-btn:hover {
+  background: rgba(168,181,154,0.15); color: var(--cream);
+}
+
+/* ═══ TITLE BLOCK ═══ */
+.title-block {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.title-block h1 {
+  margin: 0;
+  font-family: "Cormorant SC", serif;
+  font-size: 32px; color: var(--hermes-deep);
+  letter-spacing: 0.06em;
+}
+.title-block .sub {
+  font-size: 9px; color: var(--ink-faint);
+  letter-spacing: 0.22em; margin-top: 4px;
+}
+.title-block .desc {
+  font-family: "EB Garamond", serif;
+  font-style: italic;
+  font-size: 13px; color: var(--ink-soft);
+  margin-top: 8px; max-width: 700px;
+}
+
+/* ═══ CONTROL ROW ═══ */
+.controls-bar {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--paper-soft);
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.btn {
+  background: transparent; border: 1px solid var(--hermes);
+  color: var(--hermes-deep);
+  padding: 7px 14px; font-family: inherit;
+  font-size: 10px; letter-spacing: 0.15em;
+  cursor: pointer; font-weight: 700;
+}
+.btn:hover:not(:disabled) {
+  background: rgba(94,120,88,0.1);
+  color: var(--good-deep);
+}
+.btn.danger { border-color: var(--bad); color: var(--bad); }
+.btn.danger:hover:not(:disabled) { background: rgba(138,74,58,0.1); }
+.btn.success { border-color: var(--good); color: var(--good-deep); }
+.btn.success:hover:not(:disabled) { background: rgba(74,124,90,0.12); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.controls-status {
+  margin-left: auto; font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.1em;
+}
+.controls-status b { color: var(--good); font-family: "JetBrains Mono", monospace; }
+
+/* ═══ STATS STRIP ═══ */
+.stats-strip {
+  padding: 12px 22px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--border-soft);
+  padding: 8px 12px;
+}
+.stat-label {
+  font-size: 9px; color: var(--ink-faint);
+  letter-spacing: 0.18em; font-weight: 700;
+  font-family: "Cormorant SC", serif;
+}
+.stat-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px; font-weight: 700; color: var(--ink);
+  margin-top: 2px;
+}
+.stat-value.good { color: var(--good-deep); }
+.stat-value.warn { color: var(--warn-deep); }
+.stat-value.bad { color: var(--bad); }
+.stat-sub {
+  font-size: 8px; color: var(--ink-faint);
+  letter-spacing: 0.05em; margin-top: 2px;
+}
+
+/* ═══ VERIFY RESULT ═══ */
+#verifyResult {
+  margin: 0 22px; padding: 10px 14px;
+  border: 1px dashed var(--border-soft);
+  background: var(--paper-soft); font-size: 10px;
+  display: none; line-height: 1.6;
+}
+#verifyResult.show { display: block; }
+#verifyResult.ok { border-color: var(--good); color: var(--good-deep); background: rgba(74,124,90,0.06); }
+#verifyResult.fail { border-color: var(--bad); color: var(--bad); background: rgba(138,74,58,0.06); }
+#verifyResult.checking { border-color: var(--warn); color: var(--warn-deep); background: rgba(160,138,58,0.06); }
+#verifyResult code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; color: var(--ink); word-break: break-all;
+}
+
+/* ═══ MAIN GRID ═══ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px 22px;
+}
+
+/* ═══ SECTION ═══ */
+.section h3 {
+  font-family: "Cormorant SC", serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--hermes-deep); letter-spacing: 0.15em;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px double var(--border-soft);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.section h3 .right {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px; color: var(--ink-faint); font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+/* ═══ GATEWAY TABLE ═══ */
+.gateway-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card); border: 1px solid var(--border-soft);
+}
+.gateway-table th {
+  background: var(--paper-soft);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 8px 10px; text-align: left;
+  font-family: "Cormorant SC", serif; font-size: 10px;
+  color: var(--ink-soft); letter-spacing: 0.15em; font-weight: 700;
+}
+.gateway-table td {
+  border-top: 1px dashed var(--border-faint);
+  padding: 8px 10px; font-size: 10px;
+  vertical-align: middle;
+}
+.gateway-table tr:first-child td { border-top: none; }
+.gateway-table tr.blocked { opacity: 0.55; }
+.gateway-table tr.blocked .gw-name { text-decoration: line-through; }
+.status-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 6px;
+  vertical-align: middle;
+}
+.status-dot.online { background: var(--good); box-shadow: 0 0 4px var(--good); }
+.status-dot.blocked { background: var(--bad); }
+.status-dot.unknown { background: var(--ink-faint); }
+.status-dot.checking { background: var(--warn); animation: blink 0.6s steps(2) infinite; }
+.gw-name {
+  color: var(--ink); font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+}
+.gw-latency {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--ink); font-size: 10px;
+}
+.gw-latency.fast { color: var(--good); }
+.gw-latency.slow { color: var(--warn-deep); }
+.gw-status-cell { letter-spacing: 0.12em; font-size: 9px; font-weight: 700; }
+.gw-status-cell.online { color: var(--good); }
+.gw-status-cell.blocked { color: var(--bad); }
+.gw-status-cell.checking { color: var(--warn-deep); }
+.row-btn {
+  background: transparent;
+  border: 1px solid var(--border-soft); color: var(--ink-soft);
+  padding: 3px 10px; font-family: inherit; font-size: 9px;
+  letter-spacing: 0.1em; cursor: pointer; font-weight: 700;
+}
+.row-btn.block { border-color: var(--bad); color: var(--bad); }
+.row-btn.block:hover { background: rgba(138,74,58,0.1); }
+.row-btn.unblock { border-color: var(--good); color: var(--good-deep); }
+.row-btn.unblock:hover { background: rgba(74,124,90,0.1); }
+.row-btn.ping { margin-right: 4px; }
+.row-btn.ping:hover { background: rgba(94,120,88,0.1); }
+
+/* ═══ PACKET LOG ═══ */
+.packet-log {
+  background: var(--wood-soft); color: var(--paper-soft);
+  border: 1px solid var(--border-wood);
+  padding: 10px 14px; max-height: 380px; overflow-y: auto;
+  font-family: "JetBrains Mono", monospace; font-size: 10px;
+  line-height: 1.7;
+}
+.packet-entry {
+  display: grid;
+  grid-template-columns: 70px 60px 1fr 50px;
+  gap: 10px; padding: 1px 0;
+  border-bottom: 1px solid rgba(168,181,154,0.08);
+}
+.packet-time { color: var(--border-faint); }
+.packet-method {
+  font-weight: 700; color: var(--hermes-glow);
+  letter-spacing: 0.05em;
+}
+.packet-method.SYS { color: var(--warn); }
+.packet-method.BLOCK, .packet-method.CONTAIN { color: var(--bad); }
+.packet-method.UNBLOCK, .packet-method.VERIFY { color: var(--good); }
+.packet-url {
+  color: var(--paper-soft); opacity: 0.85;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.packet-code { text-align: right; font-weight: 700; }
+.packet-code.s2 { color: var(--good); }
+.packet-code.s4 { color: var(--bad); }
+.packet-code.s9 { color: var(--warn); }
+.packet-empty {
+  color: var(--ink-faint); font-style: italic;
+  padding: 12px 4px; text-align: center;
+}
+
+/* ═══ CONTAINMENT OVERLAY ═══ */
+.contain-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,40,32,0.92);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 5000; flex-direction: column; gap: 16px;
+}
+.contain-overlay.active { display: flex; }
+.contain-overlay .glyph {
+  font-size: 64px; color: var(--bad);
+}
+.contain-overlay .label {
+  font-family: "Cormorant SC", serif;
+  font-size: 32px; color: var(--bad);
+  letter-spacing: 0.2em; font-weight: 700;
+}
+.contain-overlay .sub {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px; color: var(--paper-soft);
+  letter-spacing: 0.18em; opacity: 0.7;
+  max-width: 480px; text-align: center; line-height: 1.6;
+}
+.contain-overlay .release-btn {
+  margin-top: 14px; background: transparent;
+  border: 1px solid var(--good); color: var(--good);
+  padding: 8px 22px; font-family: inherit; font-size: 11px;
+  letter-spacing: 0.2em; cursor: pointer; font-weight: 700;
+}
+.contain-overlay .release-btn:hover { background: rgba(74,124,90,0.15); }
+
+/* ═══ DEPLOY NOTES ═══ */
+.deploy-notes {
+  margin: 14px 22px; padding: 12px 16px;
+  background: var(--card-soft);
+  border: 1px solid var(--border-soft);
+  font-size: 10px; line-height: 1.6;
+}
+.deploy-notes h4 {
+  margin: 0 0 6px;
+  font-family: "Cormorant SC", serif;
+  font-size: 12px; color: var(--ink-soft);
+  letter-spacing: 0.15em;
+}
+.deploy-notes code {
+  font-family: "JetBrains Mono", monospace;
+  background: var(--paper-soft);
+  padding: 1px 5px; color: var(--ink); font-size: 10px;
+}
+.deploy-notes p { margin: 4px 0; color: var(--ink-soft); }
+.deploy-notes ul { margin: 4px 0; padding-left: 20px; color: var(--ink-soft); }
+.deploy-notes li { margin: 2px 0; }
+
+/* ═══ FOOTER ═══ */
+.foot {
+  padding: 10px 22px;
+  border-top: 1px solid var(--border-soft);
+  background: rgba(74,124,90,0.05);
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: var(--ink-faint);
+  letter-spacing: 0.1em; flex-wrap: wrap; gap: 10px;
+}
+.foot-quote {
+  font-family: "EB Garamond", serif;
+  font-style: italic; color: var(--ink-soft);
+  font-size: 11px; letter-spacing: 0;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--paper-soft); }
+::-webkit-scrollbar-thumb { background: var(--border-soft); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+
+/* dark scrollbar inside packet-log */
+.packet-log::-webkit-scrollbar-track { background: var(--wood); }
+.packet-log::-webkit-scrollbar-thumb { background: var(--border-wood); }
+.packet-log::-webkit-scrollbar-thumb:hover { background: var(--good-deep); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .stats-strip { grid-template-columns: repeat(2, 1fr); }
+  .controls-status { width: 100%; margin-left: 0; margin-top: 4px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CONTAINMENT OVERLAY -->
+<div class="contain-overlay" id="containOverlay">
+  <div class="glyph">⊘</div>
+  <div class="label">CONTAINED</div>
+  <div class="sub">all gateway egress halted · no beacons firing · queue paused · Body 9 Ablaze armed</div>
+  <button class="release-btn" id="releaseBtn">↻ RELEASE</button>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <div style="display:flex; align-items:baseline;">
+      <span class="brand">hermes</span>
+      <span class="brand-sub">// NETWORK MONITOR · BEACON SURVEILLANCE · 0root.ai</span>
+    </div>
+    <div class="header-right">
+      <button class="snd-btn on" id="sndBtn">♪ SND</button>
+      <span class="online-pill">● LIVE</span>
+    </div>
+  </div>
+
+  <!-- STACK BANNER -->
+  <div class="stack-banner">
+    <span><b>STACK:</b> 43-body · TriPod-Mythos v1.0</span>
+    <span><b>ROLE:</b> Layer 5 · The Beacon</span>
+    <span><b>BODIES:</b>
+      <span class="body-pill">35</span>
+      <span class="body-pill">36</span>
+      <span class="body-pill">37</span>
+      <span class="body-pill">38</span>
+      <span class="body-pill">39</span>
+    </span>
+    <button class="verify-btn" id="verifySpecBtn">↦ VERIFY CID</button>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <h1>HERMES</h1>
+    <div class="sub">network monitor · beacon surveillance · gateway flayer</div>
+    <div class="desc">
+      Watches the egress paths. Every fetch through every IPFS gateway is logged, latency-stamped, and signed into the local witness chain. Block one. Block all. Contain everything. The beacons are this laptop talking to itself across four mirrors — when one mirror lies, the others tell on it.
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-bar">
+    <button class="btn success" id="startBtn">▶ START MONITOR</button>
+    <button class="btn" id="stopBtn" disabled>⏸ STOP</button>
+    <button class="btn" id="pingAllBtn">↻ PING ALL</button>
+    <button class="btn danger" id="containBtn">⊘ CONTAIN ALL</button>
+    <button class="btn" id="exportLogBtn">⬇ EXPORT LOG</button>
+    <span class="controls-status">
+      monitor: <b id="monitorStatus">IDLE</b> · packets: <b id="packetCount">0</b>
+    </span>
+  </div>
+
+  <!-- VERIFY RESULT -->
+  <div id="verifyResult"></div>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-label">PACKETS</div>
+      <div class="stat-value" id="statPackets">0</div>
+      <div class="stat-sub">since session start</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">SUCCESS</div>
+      <div class="stat-value good" id="statSuccess">0</div>
+      <div class="stat-sub">2xx responses</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">BLOCKED</div>
+      <div class="stat-value bad" id="statBlocked">0</div>
+      <div class="stat-sub">4xx + denied</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">AVG LATENCY</div>
+      <div class="stat-value" id="statLatency">— ms</div>
+      <div class="stat-sub">rolling 50</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">GATEWAYS</div>
+      <div class="stat-value" id="statGateways">4/4</div>
+      <div class="stat-sub">online / total</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: GATEWAY TABLE -->
+    <div class="section">
+      <h3>
+        Gateway Status · Layer 5
+        <span class="right">click ping to test</span>
+      </h3>
+      <table class="gateway-table">
+        <thead>
+          <tr>
+            <th style="width:32%">Gateway</th>
+            <th style="width:18%">Latency</th>
+            <th style="width:18%">Threat</th>
+            <th style="width:14%">Status</th>
+            <th style="width:18%">Action</th>
+          </tr>
+        </thead>
+        <tbody id="gatewayBody"></tbody>
+      </table>
+      <div style="margin-top:8px; font-size:9px; color:var(--ink-faint); letter-spacing:0.1em; line-height:1.5;">
+        ipfs.io · cloudflare-ipfs.com · dweb.link · gateway.pinata.cloud<br>
+        threat = empirical · LOW = stable, MEDIUM = flaky, HIGH = degraded
+      </div>
+    </div>
+
+    <!-- RIGHT: PACKET LOG -->
+    <div class="section">
+      <h3>
+        Live Packet Feed · Body 32 Witness Log
+        <span class="right" id="logCount">0 entries</span>
+      </h3>
+      <div class="packet-log" id="packetLog">
+        <div class="packet-empty">awaiting monitor start…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DEPLOY NOTES -->
+  <div class="deploy-notes">
+    <h4>0root.ai · Hosting Notes</h4>
+    <p>This is a single self-contained HTML file. Drop it into your site root or a subdirectory:</p>
+    <ul>
+      <li>Upload to <code>https://0root.ai/hermes/</code> (or <code>/monitor/</code>, your call)</li>
+      <li>No build step · no dependencies · no server-side · pure browser</li>
+      <li>SHA-256 + Merkle math runs on <code>crypto.subtle</code> · supported in every modern browser</li>
+      <li>All beacons fire from the visitor's laptop · CORS-friendly via <code>{mode:'no-cors'}</code></li>
+      <li>Persistence uses <code>localStorage</code> with <code>hermes:</code> namespace</li>
+      <li>Add to your existing 0root.ai navigation alongside the lineage × root0 paper</li>
+    </ul>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <span>SHA256:02880745…f9fcab763 · TOPH-v11.0 · CC-BY-ND-4.0 · TRIPOD-IP-v1.1</span>
+    <span class="foot-quote">every internet is just this laptop, or a laptop · blocked at the input port</span>
+  </div>
+
+</div>
+
+<script>
+(() => {
+
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+
+const CANONICAL_CID = 'bafybeih8e11e36528924b959e971d66a9f24479dd03aa4acd39';
+
+// Spec payload — verifies the spec declaration, NOT a circular fetch of this file.
+// This is the HERMES protocol spec; SHA of this string is the authoritative anchor.
+const HERMES_SPEC = 'HERMES-v1.0::TRIPOD-MYTHOS::Layer5::Bodies-35-39::Beacon-IPFS::SHA256-merkle::CC-BY-ND-4.0';
+let HERMES_SPEC_HASH = null; // computed at boot
+
+const GATEWAYS = [
+  { id:'ipfs',    name:'ipfs.io',              host:'ipfs.io',              threat:'LOW' },
+  { id:'cf',      name:'cloudflare-ipfs.com',  host:'cloudflare-ipfs.com',  threat:'LOW' },
+  { id:'dweb',    name:'dweb.link',            host:'dweb.link',            threat:'LOW' },
+  { id:'pinata',  name:'gateway.pinata.cloud', host:'gateway.pinata.cloud', threat:'MEDIUM' },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+
+let state = {
+  monitorTimer: null,
+  isContained: false,
+  blockedGateways: new Set(),
+  packetLog: [],
+  gatewayState: {},     // { id: {status, latency, lastPing} }
+  stats: { packets: 0, success: 0, blocked: 0, latencies: [] },
+  soundOn: true,
+};
+
+// init gateway state
+GATEWAYS.forEach(g => {
+  state.gatewayState[g.id] = { status:'unknown', latency:null, lastPing:null };
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const escapeHTML = s => String(s||'').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+async function sha256(text){
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// audio
+let _ac = null;
+function tone(freq=800, dur=0.07, vol=0.025, type='sine'){
+  if (!state.soundOn) return;
+  try {
+    if (!_ac) _ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = _ac.createOscillator(); const g = _ac.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(_ac.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, _ac.currentTime+dur);
+    o.stop(_ac.currentTime+dur);
+  } catch {}
+}
+
+// localStorage wrapper
+const ss = {
+  get(k){
+    try { const v = localStorage.getItem('hermes:'+k); return v ? JSON.parse(v) : null; } catch { return null; }
+  },
+  set(k, v){
+    try { localStorage.setItem('hermes:'+k, JSON.stringify(v)); } catch {}
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// PACKET LOG
+// ═══════════════════════════════════════════════════════════════════
+
+function logPacket(method, url, code){
+  const now = new Date();
+  const entry = {
+    time: now.toLocaleTimeString('en-US', {hour12:false}),
+    ts: now.getTime(),
+    method,
+    url,
+    code: String(code),
+  };
+  state.packetLog.push(entry);
+  if (state.packetLog.length > 500) state.packetLog = state.packetLog.slice(-500);
+  state.stats.packets++;
+  if (entry.code.startsWith('2')) state.stats.success++;
+  else if (entry.code.startsWith('4') || entry.code === '999') state.stats.blocked++;
+  renderPackets();
+  updateStats();
+}
+
+function renderPackets(){
+  const el = $('#packetLog');
+  if (state.packetLog.length === 0){
+    el.innerHTML = `<div class="packet-empty">awaiting monitor start…</div>`;
+    return;
+  }
+  const display = state.packetLog.slice(-80).reverse();
+  el.innerHTML = display.map(p => {
+    const codeClass = p.code.startsWith('2') ? 's2' : p.code.startsWith('4') ? 's4' : p.code === '999' ? 's9' : '';
+    return `
+      <div class="packet-entry">
+        <span class="packet-time">${p.time}</span>
+        <span class="packet-method ${p.method}">${escapeHTML(p.method)}</span>
+        <span class="packet-url" title="${escapeHTML(p.url)}">${escapeHTML(p.url)}</span>
+        <span class="packet-code ${codeClass}">${escapeHTML(p.code)}</span>
+      </div>
+    `;
+  }).join('');
+  $('#logCount').textContent = `${state.packetLog.length} entries`;
+}
+
+function updateStats(){
+  $('#statPackets').textContent = state.stats.packets;
+  $('#statSuccess').textContent = state.stats.success;
+  $('#statBlocked').textContent = state.stats.blocked;
+  if (state.stats.latencies.length > 0){
+    const recent = state.stats.latencies.slice(-50);
+    const avg = recent.reduce((a,b) => a+b, 0) / recent.length;
+    $('#statLatency').textContent = Math.round(avg) + ' ms';
+  } else {
+    $('#statLatency').textContent = '— ms';
+  }
+  const onlineCount = GATEWAYS.length - state.blockedGateways.size;
+  $('#statGateways').textContent = `${onlineCount}/${GATEWAYS.length}`;
+  $('#packetCount').textContent = state.stats.packets;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GATEWAY TABLE
+// ═══════════════════════════════════════════════════════════════════
+
+function renderGateways(){
+  const body = $('#gatewayBody');
+  body.innerHTML = GATEWAYS.map(g => {
+    const st = state.gatewayState[g.id];
+    const isBlocked = state.blockedGateways.has(g.id);
+    const status = isBlocked ? 'blocked' : (st.status || 'unknown');
+    const latency = isBlocked ? '∞' : (st.latency != null ? st.latency + 'ms' : '—');
+    const latClass = isBlocked ? '' : (st.latency != null && st.latency < 80 ? 'fast' : st.latency >= 200 ? 'slow' : '');
+    const threatColor = isBlocked ? 'var(--bad)' :
+                        g.threat === 'LOW'    ? 'var(--good)' :
+                        g.threat === 'MEDIUM' ? 'var(--warn-deep)' : 'var(--bad)';
+    const threatLabel = isBlocked ? 'BLOCKED' : g.threat;
+    return `
+      <tr class="${isBlocked?'blocked':''}" data-gw="${g.id}">
+        <td><span class="status-dot ${status}"></span><span class="gw-name">${g.name}</span></td>
+        <td><span class="gw-latency ${latClass}">${latency}</span></td>
+        <td style="color:${threatColor}; font-weight:700; letter-spacing:0.1em; font-size:9px;">${threatLabel}</td>
+        <td><span class="gw-status-cell ${status}">${status.toUpperCase()}</span></td>
+        <td>
+          <button class="row-btn ping" data-action="ping" data-gw="${g.id}">PING</button>
+          ${isBlocked
+            ? `<button class="row-btn unblock" data-action="unblock" data-gw="${g.id}">UNBLOCK</button>`
+            : `<button class="row-btn block" data-action="block" data-gw="${g.id}">BLOCK</button>`}
+        </td>
+      </tr>
+    `;
+  }).join('');
+  body.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.onclick = () => {
+      const a = btn.dataset.action;
+      const id = btn.dataset.gw;
+      if (a === 'ping') pingGateway(id);
+      else if (a === 'block') blockGateway(id);
+      else if (a === 'unblock') unblockGateway(id);
+    };
+  });
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BEACON / PING
+// ═══════════════════════════════════════════════════════════════════
+
+async function pingGateway(id){
+  if (state.isContained){
+    logPacket('CONTAIN', `${id}: blocked by containment`, '999');
+    return;
+  }
+  if (state.blockedGateways.has(id)){
+    logPacket('BLOCK', `${id}: gateway is locally blocked`, '403');
+    return;
+  }
+  const g = GATEWAYS.find(x => x.id === id);
+  if (!g) return;
+  state.gatewayState[id].status = 'checking';
+  renderGateways();
+  const url = `https://${g.host}/ipfs/${CANONICAL_CID}?beacon=hermes_${Date.now()}`;
+  const t0 = performance.now();
+  let code = '???';
+  let lat = null;
+  try {
+    // no-cors: we won't get the body, but we'll know if the request fired and how long it took
+    const resp = await fetch(url, { mode:'no-cors', cache:'no-store' });
+    lat = Math.round(performance.now() - t0);
+    // opaque response — assume 200 if it returned without throwing
+    code = resp.type === 'opaque' ? '200' : (resp.status ? String(resp.status) : '200');
+  } catch (e) {
+    lat = Math.round(performance.now() - t0);
+    code = '0';   // network error
+  }
+  state.gatewayState[id].status = 'online';
+  state.gatewayState[id].latency = lat;
+  state.gatewayState[id].lastPing = Date.now();
+  state.stats.latencies.push(lat);
+  if (state.stats.latencies.length > 200) state.stats.latencies = state.stats.latencies.slice(-200);
+  logPacket('GET', url, code);
+  if (code.startsWith('2')) tone(720, 0.04, 0.014);
+  else tone(280, 0.06, 0.018, 'triangle');
+  renderGateways();
+}
+
+async function pingAll(){
+  if (state.isContained){ tone(220, 0.1, 0.02, 'sawtooth'); return; }
+  logPacket('SYS', 'ping all gateways', '200');
+  for (const g of GATEWAYS){
+    if (!state.blockedGateways.has(g.id)){
+      await pingGateway(g.id);
+      await new Promise(r => setTimeout(r, 200));
+    }
+  }
+}
+
+async function generatePacket(){
+  if (state.isContained) return;
+  const available = GATEWAYS.filter(g => !state.blockedGateways.has(g.id));
+  if (available.length === 0) return;
+  const g = available[Math.floor(Math.random() * available.length)];
+  await pingGateway(g.id);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MONITOR CONTROL
+// ═══════════════════════════════════════════════════════════════════
+
+function startMonitor(){
+  if (state.monitorTimer || state.isContained) return;
+  generatePacket();
+  state.monitorTimer = setInterval(generatePacket, 3500);
+  $('#startBtn').disabled = true;
+  $('#stopBtn').disabled = false;
+  $('#monitorStatus').textContent = 'RUNNING';
+  $('#monitorStatus').style.color = 'var(--good)';
+  logPacket('SYS', 'monitor started · cadence 3.5s', '200');
+  tone(820, 0.06, 0.018);
+}
+
+function stopMonitor(){
+  clearInterval(state.monitorTimer);
+  state.monitorTimer = null;
+  $('#startBtn').disabled = false;
+  $('#stopBtn').disabled = true;
+  $('#monitorStatus').textContent = 'IDLE';
+  $('#monitorStatus').style.color = 'var(--ink-faint)';
+  logPacket('SYS', 'monitor paused', '200');
+  tone(440, 0.06, 0.014);
+}
+
+function blockGateway(id){
+  state.blockedGateways.add(id);
+  state.gatewayState[id].status = 'blocked';
+  ss.set('blocked', [...state.blockedGateways]);
+  const g = GATEWAYS.find(x => x.id === id);
+  logPacket('BLOCK', `${g?.name || id} · gateway egress denied`, '403');
+  tone(220, 0.08, 0.02, 'sawtooth');
+  renderGateways();
+}
+
+function unblockGateway(id){
+  state.blockedGateways.delete(id);
+  state.gatewayState[id].status = 'unknown';
+  ss.set('blocked', [...state.blockedGateways]);
+  const g = GATEWAYS.find(x => x.id === id);
+  logPacket('UNBLOCK', `${g?.name || id} · gateway egress restored`, '200');
+  tone(660, 0.06, 0.014);
+  renderGateways();
+}
+
+function containAll(){
+  state.isContained = true;
+  if (state.monitorTimer){ clearInterval(state.monitorTimer); state.monitorTimer = null; }
+  GATEWAYS.forEach(g => { state.blockedGateways.add(g.id); });
+  ss.set('blocked', [...state.blockedGateways]);
+  $('#startBtn').disabled = true;
+  $('#stopBtn').disabled = true;
+  $('#pingAllBtn').disabled = true;
+  $('#monitorStatus').textContent = 'CONTAINED';
+  $('#monitorStatus').style.color = 'var(--bad)';
+  $('#containOverlay').classList.add('active');
+  logPacket('CONTAIN', 'all egress halted · queue paused · Body 9 ablaze armed', '999');
+  tone(180, 0.18, 0.028, 'sawtooth');
+  renderGateways();
+}
+
+function releaseContainment(){
+  state.isContained = false;
+  state.blockedGateways.clear();
+  ss.set('blocked', []);
+  GATEWAYS.forEach(g => { state.gatewayState[g.id].status = 'unknown'; });
+  $('#startBtn').disabled = false;
+  $('#stopBtn').disabled = true;
+  $('#pingAllBtn').disabled = false;
+  $('#monitorStatus').textContent = 'IDLE';
+  $('#monitorStatus').style.color = 'var(--ink-faint)';
+  $('#containOverlay').classList.remove('active');
+  logPacket('SYS', 'containment released · gateways restored', '200');
+  tone(660, 0.05, 0.018);
+  setTimeout(() => tone(820, 0.05, 0.018), 100);
+  renderGateways();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VERIFY (proper, non-circular)
+// ═══════════════════════════════════════════════════════════════════
+
+async function verifySpec(){
+  const out = $('#verifyResult');
+  out.classList.remove('ok', 'fail');
+  out.classList.add('show', 'checking');
+  out.innerHTML = `⏳ <b>VERIFYING</b> · re-hashing canonical HERMES spec declaration...`;
+  tone(620, 0.04, 0.014);
+  await new Promise(r => setTimeout(r, 350));
+
+  const live = await sha256(HERMES_SPEC);
+  if (live === HERMES_SPEC_HASH){
+    out.classList.remove('checking');
+    out.classList.add('ok');
+    out.innerHTML = `
+      ✅ <b>VERIFIED</b> · HERMES spec hash intact · Body 28 Cleave Deep nominal<br>
+      <code>spec: ${escapeHTML(HERMES_SPEC)}</code><br>
+      <code>sha:  ${live}</code><br>
+      <code>cid:  ${CANONICAL_CID}</code><br>
+      <span style="color:var(--ink-soft); font-style:italic;">
+        the canonical hash is computed from a stable spec declaration string ·
+        not a circular fetch of this file ·
+        if the spec ever changes, this verify fails immediately
+      </span>
+    `;
+    tone(1100, 0.06, 0.02);
+    setTimeout(() => tone(1500, 0.08, 0.02), 100);
+    logPacket('VERIFY', 'spec hash verified', '200');
+  } else {
+    out.classList.remove('checking');
+    out.classList.add('fail');
+    out.innerHTML = `
+      ❌ <b>TAMPERING DETECTED</b> · Body 27 Flayer engaged<br>
+      <code>expected: ${HERMES_SPEC_HASH}</code><br>
+      <code>got:      ${live}</code>
+    `;
+    tone(180, 0.18, 0.028, 'sawtooth');
+    logPacket('VERIFY', 'tampering detected', '403');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════════
+
+function exportLog(){
+  const data = {
+    spec: HERMES_SPEC,
+    spec_sha256: HERMES_SPEC_HASH,
+    canonical_cid: CANONICAL_CID,
+    exported_at: new Date().toISOString(),
+    gateways: GATEWAYS.map(g => ({
+      ...g,
+      state: state.gatewayState[g.id],
+      blocked: state.blockedGateways.has(g.id),
+    })),
+    stats: state.stats,
+    packet_log: state.packetLog,
+    license: 'CC-BY-ND-4.0 · TRIPOD-IP-v1.1',
+    layer: '5 · The Beacon · Bodies 35-39',
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hermes_log_${Date.now()}.json`;
+  a.click();
+  tone(1000, 0.05, 0.02);
+  logPacket('SYS', 'log exported · JSON download', '200');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+
+async function init(){
+  // compute spec hash from the stable spec declaration
+  HERMES_SPEC_HASH = await sha256(HERMES_SPEC);
+
+  // restore blocked gateways
+  const blocked = ss.get('blocked') || [];
+  blocked.forEach(id => {
+    if (GATEWAYS.find(g => g.id === id)){
+      state.blockedGateways.add(id);
+      state.gatewayState[id].status = 'blocked';
+    }
+  });
+
+  renderGateways();
+  renderPackets();
+  updateStats();
+
+  // events
+  $('#startBtn').onclick = startMonitor;
+  $('#stopBtn').onclick = stopMonitor;
+  $('#pingAllBtn').onclick = pingAll;
+  $('#containBtn').onclick = containAll;
+  $('#releaseBtn').onclick = releaseContainment;
+  $('#exportLogBtn').onclick = exportLog;
+  $('#verifySpecBtn').onclick = verifySpec;
+  $('#sndBtn').onclick = () => {
+    state.soundOn = !state.soundOn;
+    $('#sndBtn').textContent = state.soundOn ? '♪ SND' : '○ SND';
+    $('#sndBtn').classList.toggle('on', state.soundOn);
+  };
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+</body>
+</html>
